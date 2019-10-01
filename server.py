@@ -27,7 +27,7 @@
 
 import paho.mqtt.client as mqtt
 import os
-import urlparse
+from urllib.parse import urlparse
 
 
 # Define event callbacks
@@ -64,7 +64,7 @@ mqttc.on_subscribe = on_subscribe
 
 # Parse CLOUDMQTT_URL (or fallback to localhost)
 url_str = os.environ.get('CLOUDMQTT_URL', 'mqtt://mosquitto:mosquitto@localhost:1883')
-url = urlparse.urlparse(url_str)
+url = urlparse(url_str)
 topic = url.path[1:] or 'test'
 
 # Connect
