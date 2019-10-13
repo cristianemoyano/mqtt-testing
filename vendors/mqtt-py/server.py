@@ -6,8 +6,9 @@ from client import MQTTClient
 @click.option('--client_id', default=None, help='MQTT Client Id')
 @click.option('--topic', default='test', help='Single MQTT Topic to subscribe')
 @click.option('--topics', default=None, help='List of MQTT Topic separated by comma to subscribe')
+@click.option('--qos', default=0, help='The quality of service level to use for the will.')
 @click.option('--log', default=None, help='Enable log')
-def run(client_id, topic, topics, log):
+def run(client_id, topic, topics, qos, log):
 
     mqtt_client = MQTTClient(
         client_id=client_id,
@@ -19,7 +20,7 @@ def run(client_id, topic, topics, log):
         for topic in [x.strip() for x in topics.split(',')]:
             mqtt_client.subscribe(topic)  # Once the client has connected to the broker, subscribe to the topic
     else:
-        mqtt_client.subscribe(topic, 0)
+        mqtt_client.subscribe(topic, qos)
 
     # Blocking call that processes network traffic, dispatches callbacks and
     # handles reconnecting.
