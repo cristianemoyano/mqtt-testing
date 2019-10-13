@@ -27,7 +27,15 @@ def on_log(client, obj, level, string):
     print(log)
 
 
-class MQTTClient:
+MQTT_DEFAULT_CALLBACKS = {
+    'on_connect': on_connect,
+    'on_message': on_message,
+    'on_publish': on_publish,
+    'on_subscribe': on_subscribe,
+}
+
+
+class MQTTClient(object):
     """
     Singleton MQTT Client
     """
@@ -36,9 +44,11 @@ class MQTTClient:
             self,
             client_id=None,
             enable_log=False,
+            callbacks=None,
         ):
             self.client_id = client_id
             self.enable_log = enable_log
+            self.callbacks = callbacks if callbacks else MQTT_DEFAULT_CALLBACKS
 
         def connect(self):
             mqtt_client = mqtt.Client(
@@ -46,10 +56,9 @@ class MQTTClient:
                 clean_session=False if self.client_id else True,
             )
             # Assign event callbacks
-            mqtt_client.on_message = on_message
-            mqtt_client.on_connect = on_connect
-            mqtt_client.on_publish = on_publish
-            mqtt_client.on_subscribe = on_subscribe
+            for key, callback in self.callbacks.items():
+                setattr(mqtt_client, key, callback)
+
             # Uncomment to enable debug messages
             if self.enable_log:
                 mqtt_client.on_log = on_log
@@ -77,15 +86,18 @@ class MQTTClient:
             self,
             client_id=None,
             enable_log=False,
+            callbacks=None,
     ):
         if not MQTTClient.instance:
             MQTTClient.instance = MQTTClient.__MQTTClient(
                 client_id=client_id,
                 enable_log=enable_log,
+                callbacks=callbacks,
             )
         else:
             MQTTClient.instance.client_id = client_id
             MQTTClient.instance.enable_log = enable_log
+            MQTTClient.instance.callbacks = callbacks
 
         MQTTClient.instance.connect()
 
