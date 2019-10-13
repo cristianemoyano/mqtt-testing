@@ -18,7 +18,7 @@ def run(client_id, topic, topics, qos, log):
     if topics:
         # Topics by comma
         for topic in [x.strip() for x in topics.split(',')]:
-            mqtt_client.subscribe(topic)  # Once the client has connected to the broker, subscribe to the topic
+            mqtt_client.subscribe(topic, qos)  # Once the client has connected to the broker, subscribe to the topic
     else:
         mqtt_client.subscribe(topic, qos)
 
