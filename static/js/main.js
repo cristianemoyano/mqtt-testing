@@ -1,17 +1,16 @@
 var host = 'localhost';
 var port = 11883;
-var topic = '#';
 var useTLS = false;
 var cleansession = false;
 var mqtt;
 var clientId;
 var reconnectTimeout = 2000;
 
-var livingTempSensorCanva = document.getElementById('livingTempChart').getContext('2d');
+var livingTempSensorCanva = document.getElementById('living-chart').getContext('2d');
 var labelslivingTempSensor = new Array();
 var datalivingTempSensor = new Array();
 
-var basementTempSensorChartCanva = document.getElementById('basementTempSensorChart').getContext('2d');
+var basementTempSensorChartCanva = document.getElementById('basement-chart').getContext('2d');
 var labelsbasementTempSensor = new Array();
 var databasementTempSensor = new Array();
 
@@ -27,13 +26,13 @@ var topics = [
     'home/kitchen/window',
 ]
 
+var itemsTable = ["timestamp", "topic", "message"];
+
 function loadMessages() {
-     // LET'S SAY THAT WE HAVE A SIMPLE FLAT ARRAY
-  let itemsTable = ["doge", "cate", "birb", "doggo", "moon moon", "awkward seal"];
 
   // DRAW THE HTML TABLE
   let perrow = 3, // 3 items per row
-      html = "<table class='table table-striped'><tr>";
+      html = "<table class='table table-bordered table-striped mb-0'><tr>";
 
   // Loop through array and add table cells
   for (let i=0; i<itemsTable.length; i++) {
@@ -50,11 +49,17 @@ function loadMessages() {
   document.getElementById("tableDinamic").innerHTML = html;
 }
 
+function uuidv4() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}
+
 function MQTTconnect() {
     if (typeof path == "undefined") {
         path = '/mqtt';
     }
-    clientId = "mqtt_panel";
+    clientId = "mqtt_panel" + uuidv4();
     mqtt = new Paho.Client(host, Number(port), clientId);
     var options = {
         invocationContext: { host: host, port: port, path: path, clientId: clientId },
@@ -74,7 +79,7 @@ function MQTTconnect() {
 
     mqtt.onConnectionLost = onConnectionLost;
     mqtt.onMessageArrived = onMessageArrived;
-    console.log("Host: " + host + ", Port: " + port + ", Path: " + path + " TLS: " + useTLS);
+    console.log("Host: " + host + ", Port: " + port + ", Path: " + path + " TLS: " + useTLS + ' Client ID ' + clientId);
     mqtt.connect(options);
 };
 
@@ -96,14 +101,18 @@ function onConnectionLost(response) {
 function onMessageArrived(message) {
     var topic = message.destinationName;
     var payload = message.payloadString;
-    //console.log("Topic: " + topic + ", Message payload: " + payload);
+    // console.log("Topic: " + topic + ", Message payload: " + payload);
     $('#message').html(topic + ', ' + payload);
     var message = topic.split('/');
     var area = message[1];
     var state = message[2];
 
     var timestamp = Math.round((new Date()).getTime() / 1000);
-    var dateString = new Date().toUTCString();
+    var dateString = new Date().toLocaleString();
+
+    itemsTable.push(dateString, topic, payload);
+
+    loadMessages();
     switch (area) {
         case 'kitchen':
             $('#kitchen').html('(Switch value: ' + payload + ')');
@@ -136,9 +145,9 @@ function onMessageArrived(message) {
             }
             break;
         case 'living':
-            $('#livingTempSensor').html('(Sensor value: ' + payload + ')');
-            $('#livingTempLabel').text(payload + '°C');
-            $('#livingTempLabel').removeClass('').addClass('badge-default');
+            $('#living').html('(Sensor value: ' + payload + ')');
+            $('#living-value').text(payload + '°C');
+            $('#living-value').removeClass('').addClass('badge-default');
 
 
             labelslivingTempSensor.push(dateString);
@@ -165,22 +174,22 @@ function onMessageArrived(message) {
 
             break;
         case 'basement':
-            $('#basementTempSensor').html('(Sensor value: ' + payload + ')');
+            $('#basement').html('(Sensor value: ' + payload + ')');
             if (payload >= 25) {
-                $('#basementTempLabel').text(payload + '°C - too hot');
-                $('#basementTempLabel').removeClass('badge-warning badge-success badge-info badge-primary').addClass('badge-danger');
+                $('#basement-value').text(payload + '°C - too hot');
+                $('#basement-value').removeClass('badge-warning badge-success badge-info badge-primary').addClass('badge-danger');
             } else if (payload >= 21) {
-                $('#basementTempLabel').text(payload + '°C - hot');
-                $('#basementTempLabel').removeClass('badge-danger badge-success badge-info badge-primary').addClass('badge-warning');
+                $('#basement-value').text(payload + '°C - hot');
+                $('#basement-value').removeClass('badge-danger badge-success badge-info badge-primary').addClass('badge-warning');
             } else if (payload >= 18) {
-                $('#basementTempLabel').text(payload + '°C - normal');
-                $('#basementTempLabel').removeClass('badge-danger badge-warning badge-info badge-primary').addClass('badge-success');
+                $('#basement-value').text(payload + '°C - normal');
+                $('#basement-value').removeClass('badge-danger badge-warning badge-info badge-primary').addClass('badge-success');
             } else if (payload >= 15) {
-                $('#basementTempLabel').text(payload + '°C - low');
-                $('#basementTempLabel').removeClass('badge-danger badge-warning badge-success badge-primary').addClass('badge-info');
+                $('#basement-value').text(payload + '°C - low');
+                $('#basement-value').removeClass('badge-danger badge-warning badge-success badge-primary').addClass('badge-info');
             } else if (mpayload <= 12) {
-                $('#basementTempLabel').text(payload + '°C - too low');
-                $('#basementTempLabel').removeClass('badge-danger badge-warning badge-success badge-info').addClass('badge-primary');
+                $('#basement-value').text(payload + '°C - too low');
+                $('#basement-value').removeClass('badge-danger badge-warning badge-success badge-info').addClass('badge-primary');
 
             }
 
@@ -194,7 +203,7 @@ function onMessageArrived(message) {
                     "labels": labelsbasementTempSensor,
                     "datasets": [
                         { 
-                        "label": "Living room temperature",
+                        "label": "Basement room temperature",
                         "data": databasementTempSensor, 
                         "fill": false,
                         "borderColor": "rgb(75, 192, 192)",
@@ -211,5 +220,4 @@ function onMessageArrived(message) {
 };
 $(document).ready(function() {
     MQTTconnect();
-    loadMessages();
 });

@@ -1,7 +1,109 @@
-<html>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Dashboard</title>
+
+	<!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- MQTT Websocket -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
+	<style>
+	.my-custom-scrollbar {
+	position: relative;
+	height: 200px;
+	overflow: auto;
+	}
+	.table-wrapper-scroll-y {
+	display: block;
+	}
+	</style>
+</head>
 <body>
-{% autoescape on %}
-    {{ body }}
-{% endautoescape %}
+<br>
+<nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+  <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Sensalink</a>
+</nav>
+
+<div class="container-fluid">
+	<br>
+  <div class="row">
+
+    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <div class="sidebar-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">
+              <span data-feather="home"></span>
+              Dashboard <span class="sr-only">(current)</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Dashboard</h1>
+        <div class="btn-toolbar mb-4 mb-md-0">
+        <div class="btn-group mr-2">
+          	
+          	<div><b>Status: </b>  <small id='status' class="badge badge-secondary">Unknown</small></div>
+      	</div>
+        </div>
+      </div>
+		<div ><b>Latest MQTT message:  </b> <small id="message" class="badge badge-secondary">no message recieved</small></div>
+		<br>
+
+		
+
+		
+		<div class="card-columns">
+		
+		{% for device in body.devices %}
+	
+		<div class="card bg-default text-center">
+		    <blockquote class="blockquote mb-0">
+		    	<h5 class="card-title">{{ device.name }}</h5>
+		      <p class="card-text text-white">
+		      	{% if device.device_type == 'sensor' %}
+			        <canvas id="{{ device.id }}-{{ device.widget_type }}" width="auto" height="auto"></canvas>
+		        {% else %}
+			    	
+			    {% endif %}
+		      </p>
+		      <span id="{{ device.id }}-value" class="badge badge-secondary">Unknown</span>
+		      <footer class="blockquote-footer text-white">
+		        <small id="{{ device.id }}">(no value recieved)</small>
+		      </footer>
+		    </blockquote>
+		 </div>
+
+		{% endfor %}
+		 </div>
+		
+		<div class="table-wrapper-scroll-y my-custom-scrollbar">
+		<div id="tableDinamic"></div>
+		</div>
+      
+    </main>
+  </div>
+</div>
+
+
+	<!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <!-- Chart -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+   
+    <!-- MQTT Websocket -->
+    
+    <script type="text/javascript" src='{% static "js/main.js" %}'></script>
+
 </body>
 </html>
