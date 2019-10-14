@@ -63,7 +63,7 @@ function MQTTconnect() {
     mqtt = new Paho.Client(host, Number(port), clientId);
     var options = {
         invocationContext: { host: host, port: port, path: path, clientId: clientId },
-        keepAliveInterval: 60,
+        keepAliveInterval: 10,
         userName: 'mosquitto',
         password: 'mosquitto',
         reconnect: true,
