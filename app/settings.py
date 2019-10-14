@@ -25,7 +25,7 @@ SECRET_KEY = '%bqm#h^awpz!n7q_4s&7iywnt&*d0%q+%n)2_dwm4_fzcn6=50'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.herokuapp.com']
 
 
 # Application definition
@@ -40,17 +40,28 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Internal apps
     'posts',
+    # Third party
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # Start Third party
+    'corsheaders.middleware.CorsMiddleware',
+    # End Third party
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
 
 ROOT_URLCONF = 'app.urls'
 

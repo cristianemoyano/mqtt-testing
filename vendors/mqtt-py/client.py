@@ -44,16 +44,19 @@ class MQTTClient(object):
             self,
             client_id=None,
             enable_log=False,
+            enable_ws=False,
             callbacks=None,
         ):
             self.client_id = client_id
             self.enable_log = enable_log
+            self.enable_ws = enable_ws
             self.callbacks = callbacks if callbacks else MQTT_DEFAULT_CALLBACKS
 
         def connect(self):
             mqtt_client = mqtt.Client(
                 client_id=self.client_id if self.client_id else "",
                 clean_session=False if self.client_id else True,
+                protocol=mqtt.MQTTv311,
             )
             # Assign event callbacks
             for key, callback in self.callbacks.items():
@@ -64,11 +67,13 @@ class MQTTClient(object):
                 mqtt_client.on_log = on_log
 
             # Parse CLOUDMQTT_URL (or fallback to localhost)
-            url_str = os.getenv('CLOUDMQTT_URL')
+            env = 'CLOUDMQTT_URL_WS' if self.enable_ws else 'CLOUDMQTT_URL'
+            url_str = os.getenv(env)
             url = urlparse(url_str)
 
             # Connect
-            mqtt_client.username_pw_set(url.username, url.password)
+            if not self.enable_ws:
+                mqtt_client.username_pw_set(url.username, url.password)
             mqtt_client.connect(
                 host=url.hostname,
                 port=url.port,
@@ -86,17 +91,20 @@ class MQTTClient(object):
             self,
             client_id=None,
             enable_log=False,
+            enable_ws=False,
             callbacks=None,
     ):
         if not MQTTClient.instance:
             MQTTClient.instance = MQTTClient.__MQTTClient(
                 client_id=client_id,
                 enable_log=enable_log,
+                enable_ws=enable_ws,
                 callbacks=callbacks,
             )
         else:
             MQTTClient.instance.client_id = client_id
             MQTTClient.instance.enable_log = enable_log
+            MQTTClient.instance.enable_ws = enable_ws
             MQTTClient.instance.callbacks = callbacks
 
         MQTTClient.instance.connect()

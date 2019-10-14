@@ -11,6 +11,7 @@ django = ">=2.2"
 paho-mqtt = "*"
 click = "*"
 python-dotenv = "*"
+django-cors-headers = "*"
 
 [requires]
 python_version = "3.7"
