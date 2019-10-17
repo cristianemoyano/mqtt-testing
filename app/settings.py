@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'posts',
     # Third party
     'corsheaders',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -136,3 +137,17 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_media/')
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
+
+# Channels
+# https://channels.readthedocs.io/en/latest/installation.html
+ASGI_APPLICATION = "app.routing.application"
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+    },
+}

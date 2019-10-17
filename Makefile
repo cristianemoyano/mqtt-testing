@@ -18,3 +18,6 @@ stop_mosquitto:
 
 restart_mosquitto:
 	brew services restart mosquitto
+
+mqtt:
+	python app/cli.py -H localhost -p 1883 -U mosquitto -P mosquitto  -c asgi:application -v

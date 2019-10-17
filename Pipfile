@@ -12,6 +12,8 @@ paho-mqtt = "*"
 click = "*"
 python-dotenv = "*"
 django-cors-headers = "*"
+channels = "*"
+channels-redis = "*"
 
 [requires]
 python_version = "3.7"

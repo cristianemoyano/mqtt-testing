@@ -1,8 +1,10 @@
 import click
 import random
 import time
-
+import logging
 from client import MQTTClient
+
+logger = logging.getLogger(__name__)
 
 
 def get_topic_message():
@@ -13,14 +15,14 @@ def get_topic_message():
     area = random.choice(areas)
     if (area in ['basement', 'living']):
         topic = element + '/' + area + '/temp'
-        print(topic)
+        logger.info(topic)
         message = random.randrange(0, 30, 1)
-        print(message)
+        logger.info(message)
     else:
         topic = element + '/' + area + '/' + random.choice(entrances)
-        print(topic)
+        logger.info(topic)
         message = random.choice(states)
-        print(message)
+        logger.info(message)
     return topic, message
 
 
@@ -42,11 +44,19 @@ def get_topic_message():
 @click.option('--loop', default=None, help='Loop topic/message')
 def run(client_id, topic, msg, qos, retain, log, ws, auto, loop):
 
+    logging.basicConfig(
+        level={
+            0: logging.WARN,
+            1: logging.INFO,
+        }.get(log, logging.DEBUG),
+        format="%(asctime)-15s %(levelname)-8s %(message)s",
+    )
+
     mqtt_client = MQTTClient(
         client_id=client_id,
         enable_log=log,
         enable_ws=ws,
-    ).get_mqtt_client()
+    ).connect()
 
     if auto and not loop:
         auto_topic, auto_msg = get_topic_message()

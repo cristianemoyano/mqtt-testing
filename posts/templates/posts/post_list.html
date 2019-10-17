@@ -87,10 +87,14 @@
 		<div class="table-wrapper-scroll-y my-custom-scrollbar">
 		<div id="tableDinamic"></div>
 		</div>
-      
+       
+		<div id="posts"></div>
+
     </main>
   </div>
 </div>
+
+
 
 
 	<!-- jQuery -->
@@ -104,6 +108,42 @@
     <!-- MQTT Websocket -->
     
     <script type="text/javascript" src='{% static "js/main.js" %}'></script>
+
+    <!-- WEBSOCKET -->
+
+    <script type="text/javascript">
+
+
+    	let loc = window.location;    	
+    	let wsStart = 'ws://';
+
+    	if (loc.protocol === 'https:') {
+    		wsStart = 'ws://';
+    	}
+
+    	let endpoint = wsStart + loc.host + loc.pathname;
+    	let socket = new WebSocket(endpoint);
+
+    	let posts = $('#posts');
+    	socket.onmessage = function(e) {
+    		console.log("message: ", e);
+    		msgs = JSON.parse(e.data)
+    		msgs.forEach(function(item) {
+  				posts.append(
+    				"<p>"+item.topic+" - "+item.payload +"</p>"
+    			)
+			});
+    	}
+    	socket.onopen = function(e) {
+    		console.log("open: ", e);
+    	}
+    	socket.onerror = function(e) {
+    		console.log("error: ", e);
+    	}
+    	socket.onclose = function(e) {
+    		console.log("close: ", e);
+    	}
+    </script>
 
 </body>
 </html>

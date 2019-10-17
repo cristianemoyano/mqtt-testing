@@ -46,25 +46,27 @@ class MQTTClient(object):
             enable_log=False,
             enable_ws=False,
             callbacks=None,
+            userdata=None,
         ):
             self.client_id = client_id
             self.enable_log = enable_log
             self.enable_ws = enable_ws
             self.callbacks = callbacks if callbacks else MQTT_DEFAULT_CALLBACKS
-
-        def connect(self):
-            mqtt_client = mqtt.Client(
+            self.client = mqtt.Client(
+                userdata=userdata,
                 client_id=self.client_id if self.client_id else "",
                 clean_session=False if self.client_id else True,
                 protocol=mqtt.MQTTv311,
             )
+
+        def connect(self):
             # Assign event callbacks
             for key, callback in self.callbacks.items():
-                setattr(mqtt_client, key, callback)
+                setattr(self.client, key, callback)
 
             # Uncomment to enable debug messages
             if self.enable_log:
-                mqtt_client.on_log = on_log
+                self.client.on_log = on_log
 
             # Parse CLOUDMQTT_URL (or fallback to localhost)
             env = 'CLOUDMQTT_URL_WS' if self.enable_ws else 'CLOUDMQTT_URL'
@@ -73,14 +75,13 @@ class MQTTClient(object):
 
             # Connect
             if not self.enable_ws:
-                mqtt_client.username_pw_set(url.username, url.password)
-            mqtt_client.connect(
+                self.client.username_pw_set(url.username, url.password)
+            self.client.connect(
                 host=url.hostname,
                 port=url.port,
                 keepalive=60,
                 bind_address="",
             )
-            self.mqtt_client = mqtt_client
 
         def __str__(self):
             return repr(self) + self.client_id
@@ -93,6 +94,7 @@ class MQTTClient(object):
             enable_log=False,
             enable_ws=False,
             callbacks=None,
+            userdata=None,
     ):
         if not MQTTClient.instance:
             MQTTClient.instance = MQTTClient.__MQTTClient(
@@ -100,17 +102,18 @@ class MQTTClient(object):
                 enable_log=enable_log,
                 enable_ws=enable_ws,
                 callbacks=callbacks,
+                userdata=userdata,
             )
         else:
             MQTTClient.instance.client_id = client_id
             MQTTClient.instance.enable_log = enable_log
             MQTTClient.instance.enable_ws = enable_ws
             MQTTClient.instance.callbacks = callbacks
+            MQTTClient.instance.userdata = userdata
 
-        MQTTClient.instance.connect()
-
-    def get_mqtt_client(self):
-        return getattr(self.instance, 'mqtt_client')
+    def connect(self):
+        self.instance.connect()
+        return getattr(self.instance, 'client')
 
     def __getattr__(self, name):
         return getattr(self.instance, name)

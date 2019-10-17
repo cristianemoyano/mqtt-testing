@@ -15,7 +15,7 @@ def run(client_id, topic, topics, qos, log, ws):
         client_id=client_id,
         enable_log=log,
         enable_ws=ws,
-    ).get_mqtt_client()
+    ).connect()
 
     if topics:
         # Topics by comma
